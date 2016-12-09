@@ -5,15 +5,6 @@
 {
 	private int Ip;
 	private Dictionary<string, int> labels = new Dictionary<string, int>();
-	private void CheckLabel(string l, object cursor) 
-	{
-		if (!labels.ContainsKey(l)) 
-		{
-			FormatException ex = new FormatException($"unknown label {l}"); 
-			ex.Data["cursor"] = cursor;
-			throw ex;
-		}
-	}
 }
 
 program <IEnumerable<Action<Vm>>> = val:line* EOF {val.Where(x => x!=null)}
@@ -23,7 +14,7 @@ line <Action<Vm>> = _ val:instruction? newline #{Ip += val.Count();} {val.FirstO
 instruction <Action<Vm>> = 
 	"ld" _ reg:register _ "," _ n:num _ {x => {x.WriteRegister(reg,n);}}
 	/ "out" _ "(" _ i:index _ ")" _ "," _ reg:register _ {x =>{x.Output(i,reg);}}
-	/ "djnz" _ lref:labelref _ #{CheckLabel(lref,cursor);} {x => {x.DecrementJump(labels[lref]);}}
+	/ "djnz" _ lref:labelref _ {x => {x.DecrementJump(labels[lref]);}}
 	/ "rlca" _ {x => {x.RotateLeft("a");}}
 	/ "rrca" _ {x => {x.RotateRight("a");}}
 
