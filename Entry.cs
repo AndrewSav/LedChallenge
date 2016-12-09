@@ -2,7 +2,6 @@
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;
-using Pegasus.Common;
 
 namespace LedChallenge
 {
@@ -27,11 +26,6 @@ namespace LedChallenge
             catch (Exception e)
             {
                 Console.WriteLine($"Error: {e}");
-                if (e.Data.Contains("cursor") && e.Data["cursor"] is Cursor)
-                {
-                    Cursor c = (Cursor)e.Data["cursor"];
-                    Console.WriteLine($"in {args[0]} at: Line:{c.Line}, Column:{c.Column}");
-                }
             }
         }
     }
