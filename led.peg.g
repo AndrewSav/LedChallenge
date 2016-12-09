@@ -3,8 +3,6 @@
 @classname LedParser
 @members
 {
-	private List<Action<Vm>> empty = new List<Action<Vm>>();
-
 	private int Ip;
 	private Dictionary<string, int> labels = new Dictionary<string, int>();
 	private void CheckLabel(string l, object cursor) 
@@ -18,9 +16,9 @@
 	}
 }
 
-program <IList<Action<Vm>>> = i:line* EOF {i.SelectMany(x => x).ToList()}
+program <IEnumerable<Action<Vm>>> = val:line* EOF {val.Where(x => x!=null)}
 
-line <IList<Action<Vm>>> = _ i:instruction? newline #{Ip += i.Count();} {i} / label _ {empty}
+line <Action<Vm>> = _ val:instruction? newline #{Ip += val.Count();} {val.FirstOrDefault()} / label _ {null}
 
 instruction <Action<Vm>> = 
 	"ld" _ reg:register _ "," _ n:num _ {x => {x.WriteRegister(reg,n);}}
@@ -30,11 +28,11 @@ instruction <Action<Vm>> =
 	/ "rrca" _ {x => {x.RotateRight("a");}}
 
 register = [a-b]
-num <byte> = value:[0-9]<1,3> { byte.Parse(string.Join("",value)) }
-index <byte> = value:[0] { byte.Parse(value) }
+num <byte> = val:[0-9]<1,3> { byte.Parse(string.Join("",val)) }
+index <byte> = val:[0] { byte.Parse(val) }
 
-label = value:[a-zA-Z_]+ ":" #{labels[string.Join("",value)]=Ip;}
-labelref = value:[a-zA-Z_]+ {string.Join("",value)}
+label = val:[a-zA-Z_]+ ":" #{labels[string.Join("",val)]=Ip;}
+labelref = val:[a-zA-Z_]+ {string.Join("",val)}
 
 _ = [ \t]*
 newline = [\r\n]+

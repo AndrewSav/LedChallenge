@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Linq;
 using Pegasus.Common;
 
 namespace LedChallenge
@@ -16,7 +17,7 @@ namespace LedChallenge
                     Console.WriteLine("Usage: LedChallenge inputFile");
                 }
                 LedParser parser = new LedParser();
-                IList<Action<Vm>> program = parser.Parse(File.ReadAllText(args[0]));
+                IList<Action<Vm>> program = parser.Parse(File.ReadAllText(args[0])).ToList();
                 Vm vm = new Vm(program);
                 while (!vm.Eof())
                 {
