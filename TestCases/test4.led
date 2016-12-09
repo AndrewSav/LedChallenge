@@ -4,4 +4,4 @@
 loop:
   out (0),a
   rrca
-  djnz loop1
+  djnz loop
