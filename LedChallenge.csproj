@@ -51,11 +51,23 @@
   <ItemGroup>
     <Compile Include="Entry.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="State.cs" />
     <Compile Include="VM.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="README.md" />
+    <None Include="TestCases\test2.led">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="TestCases\test3.led">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="TestCases\test4.led">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="TestCases\test1.led">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <PegGrammar Include="led.peg.g">
       <Generator>MSBuild:Compile</Generator>
       <CustomToolNamespace>LedChallenge</CustomToolNamespace>

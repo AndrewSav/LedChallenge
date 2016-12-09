@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Collections.Generic;
+using Pegasus.Common;
 
 namespace LedChallenge
 {
@@ -15,9 +16,8 @@ namespace LedChallenge
                     Console.WriteLine("Usage: LedChallenge inputFile");
                 }
                 LedParser parser = new LedParser();
-                string text = File.ReadAllText(args[0]);
-                IList<Action<Vm, State>> program = parser.Parse(text);
-                Vm vm = new Vm {Program = program,State = new State()};
+                IList<Action<Vm>> program = parser.Parse(File.ReadAllText(args[0]));
+                Vm vm = new Vm(program);
                 while (!vm.Eof())
                 {
                     vm.Step();
@@ -26,6 +26,11 @@ namespace LedChallenge
             catch (Exception e)
             {
                 Console.WriteLine($"Error: {e}");
+                if (e.Data.Contains("cursor") && e.Data["cursor"] is Cursor)
+                {
+                    Cursor c = (Cursor)e.Data["cursor"];
+                    Console.WriteLine($"in {args[0]} at: Line:{c.Line}, Column:{c.Column}");
+                }
             }
         }
     }

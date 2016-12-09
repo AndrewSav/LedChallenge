@@ -3,35 +3,37 @@
 @classname LedParser
 @members
 {
-	private int IP;
+	private List<Action<Vm>> empty = new List<Action<Vm>>();
+
+	private int Ip;
 	private Dictionary<string, int> labels = new Dictionary<string, int>();
-	private List<Action<Vm,State>> empty = new List<Action<Vm,State>>();
-	private Action<Vm,State> djnz(string lref)
+	private void CheckLabel(string l, object cursor) 
 	{
-		return (vm, st) => {
-			if (st.DecrementRegister("b") > 0) {
-			    vm.IP = labels[lref] - 1;
-			}
-		};
+		if (!labels.ContainsKey(l)) 
+		{
+			FormatException ex = new FormatException($"unknown label {l}"); 
+			ex.Data["cursor"] = cursor;
+			throw ex;
+		}
 	}
 }
 
-program <IList<Action<Vm,State>>> = i:line* EOF {i.SelectMany(x => x).ToList()}
+program <IList<Action<Vm>>> = i:line* EOF {i.SelectMany(x => x).ToList()}
 
-line <IList<Action<Vm,State>>> = _ i:instruction? newline #{IP += i.Count();} {i} / label _ {empty}
+line <IList<Action<Vm>>> = _ i:instruction? newline #{Ip += i.Count();} {i} / label _ {empty}
 
-instruction <Action<Vm,State>> = 
-	"ld" _ reg:register _ "," _ n:num _ {(vm, st) => {st.WriteRegister(reg,n);}}
-	/ "out" _ "(" _ i:index _ ")" _ "," _ reg:register _ {(vm, st) =>{st.Output(i,reg);}}
-	/ "djnz" _ lref:labelref _ {djnz(lref)}
-	/ "rlca" _ {(vm, st) => {st.RotateLeft("a");}}
-	/ "rrca" _ {(vm, st) => {st.RotateRight("a");}}
+instruction <Action<Vm>> = 
+	"ld" _ reg:register _ "," _ n:num _ {x => {x.WriteRegister(reg,n);}}
+	/ "out" _ "(" _ i:index _ ")" _ "," _ reg:register _ {x =>{x.Output(i,reg);}}
+	/ "djnz" _ lref:labelref _ #{CheckLabel(lref,cursor);} {x => {x.DecrementJump(labels[lref]);}}
+	/ "rlca" _ {x => {x.RotateLeft("a");}}
+	/ "rrca" _ {x => {x.RotateRight("a");}}
 
 register = [a-b]
 num <byte> = value:[0-9]<1,3> { byte.Parse(string.Join("",value)) }
 index <byte> = value:[0] { byte.Parse(value) }
 
-label = value:[a-zA-Z_]+ ":" #{labels[string.Join("",value)]=IP;}
+label = value:[a-zA-Z_]+ ":" #{labels[string.Join("",value)]=Ip;}
 labelref = value:[a-zA-Z_]+ {string.Join("",value)}
 
 _ = [ \t]*
@@ -39,4 +41,4 @@ newline = [\r\n]+
 
 EOF
   = !.
-  / unexpected:. #error{ "Unexpected character '" + unexpected + "'." }
+  / unexpected:. #error{ "Error parsing" }
